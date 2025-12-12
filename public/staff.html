@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal - TEDx Silver Oaks Check-in</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #E62B1E 0%, #8B0000 100%);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(230, 43, 30, 0.3);
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 900;
+            color: white;
+        }
+
+        .logo-x {
+            color: #E62B1E;
+            background: white;
+            padding: 0 8px;
+            border-radius: 4px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(230, 43, 30, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #E62B1E;
+            box-shadow: 0 8px 25px rgba(230, 43, 30, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 900;
+            color: #E62B1E;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .scanner-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(230, 43, 30, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .section-title {
+            color: #E62B1E;
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #reader {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 2px solid rgba(230, 43, 30, 0.3);
+        }
+
+        .attendee-info {
+            background: rgba(230, 43, 30, 0.1);
+            border: 2px solid #E62B1E;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .attendee-info.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #888;
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: #e0e0e0;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .btn {
+            background: #E62B1E;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            background: #c41f14;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(230, 43, 30, 0.4);
+        }
+
+        .btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .attendees-list {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(230, 43, 30, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #e0e0e0;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #E62B1E;
+        }
+
+        .attendee-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .attendee-item:hover {
+            transform: translateX(5px);
+            border-color: #E62B1E;
+        }
+
+        .attendee-item.checked-in {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .attendee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .attendee-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e0e0e0;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.checked-in {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .status-badge.pending {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+        }
+
+        .attendee-details {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+            color: #4CAF50;
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+            color: #f44336;
+        }
+
+        .alert-warning {
+            background: rgba(255, 152, 0, 0.2);
+            border: 2px solid #FF9800;
+            color: #FF9800;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 15px;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #E62B1E;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c41f14;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">TED<span class="logo-x">x</span></div>
+        <div class="subtitle">Silver Oaks Staff Portal - Check-in System</div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">Total Registered</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-number" id="checkedInCount">0</div>
+                <div class="stat-label">Checked In</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-number" id="pendingCount">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number" id="percentageCount">0%</div>
+                <div class="stat-label">Check-in Rate</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Scanner Section -->
+            <div class="scanner-section">
+                <h2 class="section-title">
+                    <i class="fas fa-qrcode"></i>
+                    QR Code Scanner
+                </h2>
+
+                <div id="alert-container"></div>
+
+                <div id="reader"></div>
+
+                <button id="toggleScanner" class="btn">
+                    <i class="fas fa-camera"></i>
+                    <span>Start Scanner</span>
+                </button>
+
+                <!-- Attendee Info Display -->
+                <div id="attendeeInfo" class="attendee-info">
+                    <h3 style="color: #E62B1E; margin-bottom: 15px;">Attendee Information</h3>
+                    <div class="info-row">
+                        <span class="info-label">Name:</span>
+                        <span class="info-value" id="infoName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value" id="infoEmail">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value" id="infoPhone">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">School:</span>
+                        <span class="info-value" id="infoSchool">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value" id="infoStatus">-</span>
+                    </div>
+
+                    <button id="checkInBtn" class="btn btn-success">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Confirm Check-in</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Attendees List -->
+            <div class="attendees-list">
+                <h2 class="section-title">
+                    <i class="fas fa-users"></i>
+                    Attendees List
+                </h2>
+
+                <input type="text" id="searchBox" class="search-box" placeholder="Search by name, email, or phone...">
+
+                <div id="attendeesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let html5QrCode = null;
+        let isScanning = false;
+        let currentQRData = null;
+        let attendees = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAttendees();
+            setupEventListeners();
+            
+            // Refresh stats every 30 seconds
+            setInterval(loadStats, 30000);
+        });
+
+        function setupEventListeners() {
+            document.getElementById('toggleScanner').addEventListener('click', toggleScanner);
+            document.getElementById('checkInBtn').addEventListener('click', confirmCheckIn);
+            document.getElementById('searchBox').addEventListener('input', filterAttendees);
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/stats`);
+                const data = await response.json();
+                
+                document.getElementById('totalCount').textContent = data.total;
+                document.getElementById('checkedInCount').textContent = data.checkedIn;
+                document.getElementById('pendingCount').textContent = data.pending;
+                document.getElementById('percentageCount').textContent = data.checkInPercentage + '%';
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadAttendees() {
+            try {
+                const response = await fetch(`${API_URL}/attendees`);
+                const data = await response.json();
+                
+                attendees = data.attendees;
+                renderAttendees(attendees);
+                loadStats();
+            } catch (error) {
+                console.error('Error loading attendees:', error);
+                showAlert('Failed to load attendees', 'error');
+            }
+        }
+
+        function renderAttendees(list) {
+            const container = document.getElementById('attendeesList');
+            
+            if (list.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #888;">No attendees found</p>';
+                return;
+            }
+
+            container.innerHTML = list.map(attendee => `
+                <div class="attendee-item ${attendee.checkedIn ? 'checked-in' : ''}">
+                    <div class="attendee-header">
+                        <div class="attendee-name">${attendee.name}</div>
+                        <div class="status-badge ${attendee.checkedIn ? 'checked-in' : 'pending'}">
+                            ${attendee.checkedIn ? '✓ Checked In' : 'Pending'}
+                        </div>
+                    </div>
+                    <div class="attendee-details">
+                        <div><i class="fas fa-envelope"></i> ${attendee.email}</div>
+                        <div><i class="fas fa-phone"></i> ${attendee.phone}</div>
+                        <div><i class="fas fa-school"></i> ${attendee.school}</div>
+                        ${attendee.checkedIn ? `<div style="color: #4CAF50;"><i class="fas fa-clock"></i> ${new Date(attendee.checkInTime).toLocaleString()}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterAttendees() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = attendees.filter(attendee => 
+                attendee.name.toLowerCase().includes(searchTerm) ||
+                attendee.email.toLowerCase().includes(searchTerm) ||
+                attendee.phone.includes(searchTerm) ||
+                attendee.school.toLowerCase().includes(searchTerm)
+            );
+            renderAttendees(filtered);
+        }
+
+        async function toggleScanner() {
+            const btn = document.getElementById('toggleScanner');
+            
+            if (!isScanning) {
+                try {
+                    html5QrCode = new Html5Qrcode("reader");
+                    await html5QrCode.start(
+                        { facingMode: "environment" },
+                        { fps: 10, qrbox: { width: 250, height: 250 } },
+                        onScanSuccess,
+                        onScanError
+                    );
+                    
+                    isScanning = true;
+                    btn.innerHTML = '<i class="fas fa-stop"></i><span>Stop Scanner</span>';
+                    btn.style.background = '#f44336';
+                } catch (err) {
+                    console.error('Error starting scanner:', err);
+                    showAlert('Failed to start scanner. Please check camera permissions.', 'error');
+                }
+            } else {
+                await html5QrCode.stop();
+                isScanning = false;
+                btn.innerHTML = '<i class="fas fa-camera"></i><span>Start Scanner</span>';
+                btn.style.background = '#E62B1E';
+            }
+        }
+
+        async function onScanSuccess(decodedText) {
+            if (currentQRData === decodedText) return; // Prevent duplicate scans
+            
+            currentQRData = decodedText;
+            
+            try {
+                const response = await fetch(`${API_URL}/verify-qr`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ qrData: decodedText })
+                });
+
+                const data = await response.json();
+
+                if (data.valid) {
+                    displayAttendeeInfo(data.attendee, data.alreadyCheckedIn);
+                } else {
+                    showAlert('Invalid QR code', 'error');
+                }
+            } catch (error) {
+                console.error('Error verifying QR:', error);
+                showAlert('Error verifying QR code', 'error');
+            }
+
+            // Reset after 3 seconds
+            setTimeout(() => { currentQRData = null; }, 3000);
+        }
+
+        function onScanError(err) {
+            // Ignore scan errors (happens when no QR in view)
+        }
+
+        function displayAttendeeInfo(attendee, alreadyCheckedIn) {
+            document.getElementById('infoName').textContent = attendee.name;
+            document.getElementById('infoEmail').textContent = attendee.email;
+            document.getElementById('infoPhone').textContent = attendee.phone;
+            document.getElementById('infoSchool').textContent = attendee.school;
+            
+            const statusEl = document.getElementById('infoStatus');
+            const checkInBtn = document.getElementById('checkInBtn');
+            
+            if (alreadyCheckedIn) {
+                statusEl.textContent = `✓ Checked in at ${new Date(attendee.checkInTime).toLocaleString()}`;
+                statusEl.style.color = '#4CAF50';
+                checkInBtn.disabled = true;
+                checkInBtn.innerHTML = '<i class="fas fa-check-circle"></i><span>Already Checked In</span>';
+                showAlert(`${attendee.name} is already checked in!`, 'warning');
+            } else {
+                statusEl.textContent = 'Pending Check-in';
+                statusEl.style.color = '#FF9800';
+                checkInBtn.disabled = false;
+                checkInBtn.innerHTML = '<i class="fas fa-check-circle"></i><span>Confirm Check-in</span>';
+            }
+
+            document.getElementById('attendeeInfo').classList.add('show');
+        }
+
+        async function confirmCheckIn() {
+            if (!currentQRData) return;
+
+            try {
+                const response = await fetch(`${API_URL}/check-in`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ qrData: currentQRData })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(`✓ ${data.attendee.name} checked in successfully!`, 'success');
+                    document.getElementById('attendeeInfo').classList.remove('show');
+                    loadAttendees(); // Refresh list
+                    currentQRData = null;
+                } else {
+                    showAlert(data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error checking in:', error);
+                showAlert('Error processing check-in', 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} show`;
+            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i> ${message}`;
+            
+            container.innerHTML = '';
+            container.appendChild(alert);
+
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 300);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
