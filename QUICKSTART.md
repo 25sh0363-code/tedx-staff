@@ -1,53 +1,56 @@
-# Quick Start Guide - TEDx Check-in System
+# Quick Start - TEDx QR Check-in
 
-## For Event Coordinators
+## What This Does
+✅ Auto-sends QR codes to new registrations every 5 minutes  
+✅ Sends to all existing people immediately on startup  
+✅ Professional emails with QR codes  
+✅ Simple staff scanning portal  
 
-### Prerequisites Checklist
-- [ ] Node.js installed (version 14+)
-- [ ] Access to Google Sheet with registrations
-- [ ] Gmail account with 2-Step Verification enabled
-- [ ] Google Cloud Console access
+## Setup (5 minutes)
 
----
+### 1. Install
+```bash
+npm install
+```
 
-## Step-by-Step Setup (30 minutes)
+### 2. Google Sheets Setup
+1. Go to https://console.cloud.google.com/
+2. New Project → Enable "Google Sheets API"
+3. Create Service Account → Download JSON
+4. Save as `credentials.json` in this folder
+5. Share your Google Sheet with service account email (Editor access)
 
-### Part 1: Google Sheets API Setup (15 min)
+### 3. Gmail App Password
+1. Google Account → Security → Enable 2-Step Verification
+2. Security → App passwords → Create for "Mail"
+3. Copy the 16-character password
 
-1. **Create Google Cloud Project**
-   - Go to https://console.cloud.google.com/
-   - Click "Select a project" → "New Project"
-   - Name: "TEDx Check-in System"
-   - Click "Create"
+### 4. Configure
+Create `.env` file:
+```env
+PORT=3000
+GOOGLE_SHEET_ID=your_sheet_id_from_url
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your_16_char_app_password
+```
 
-2. **Enable Google Sheets API**
-   - In the project, go to "APIs & Services" → "Library"
-   - Search for "Google Sheets API"
-   - Click on it and press "Enable"
+### 5. Run
+```bash
+npm start
+```
 
-3. **Create Service Account**
-   - Go to "APIs & Services" → "Credentials"
-   - Click "Create Credentials" → "Service Account"
-   - Name: "tedx-checkin"
-   - Click "Create and Continue"
-   - Skip optional steps, click "Done"
+## What Happens Next
+- Immediately sends QR codes to all current registrations
+- Checks every 5 minutes for new people
+- Only sends to those who haven't received yet
+- Staff portal: http://localhost:3000/staff.html
 
-4. **Download Credentials**
-   - Click on the service account you just created
-   - Go to "Keys" tab
-   - Click "Add Key" → "Create new key"
-   - Select JSON format
-   - Click "Create" (file will download)
-   - Rename downloaded file to `credentials.json`
-   - Move it to the `backend` folder
+## Google Sheet Format
+```
+| Timestamp | Name | School | Email | Phone |
+```
 
-5. **Share Google Sheet**
-   - Open your Google Sheet with registrations
-   - Click the "Share" button
-   - Copy the service account email from credentials (looks like: `tedx-checkin@project-id.iam.gserviceaccount.com`)
-   - Paste it in the share dialog
-   - Set permission to "Editor"
-   - Uncheck "Notify people"
+Done! Everything is automatic now.
    - Click "Share"
 
 6. **Get Sheet ID**
