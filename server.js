@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const QRCode = require('qrcode');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const { google } = require('googleapis');
 const crypto = require('crypto');
 const path = require('path');
@@ -20,14 +20,8 @@ const auth = new google.auth.GoogleAuth({
 
 const sheets = google.sheets('v4');
 
-// Email transporter setup (using Gmail as example)
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS // Use App Password for Gmail
-    }
-});
+// SendGrid setup
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // In-memory storage for check-ins (use database in production)
 const checkIns = new Map();
@@ -120,9 +114,12 @@ async function generateQRCode(attendeeData) {
 
 // Send email with QR code
 async function sendQRCodeEmail(attendeeData, qrCodeImage) {
-    const mailOptions = {
-        from: `"TEDx Silver Oaks" <${process.env.EMAIL_USER}>`,
+    const msg = {
         to: attendeeData.email,
+        from: {
+            email: process.env.SENDGRID_FROM_EMAIL,
+            name: 'TEDx Silver Oaks'
+        },
         subject: 'Your TEDx Silver Oaks 2025 Entry Pass',
         html: `
             <!DOCTYPE html>
@@ -186,7 +183,7 @@ async function sendQRCodeEmail(attendeeData, qrCodeImage) {
         `
     };
 
-    await transporter.sendMail(mailOptions);
+    await sgMail.send(msg);
 }
 
 // API: Send QR codes to ALL registrations (for initial setup)
