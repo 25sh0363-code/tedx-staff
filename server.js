@@ -114,9 +114,6 @@ async function generateQRCode(attendeeData) {
 
 // Send email with QR code
 async function sendQRCodeEmail(attendeeData, qrCodeImage) {
-    // Convert data URL to base64
-    const base64Data = qrCodeImage.replace(/^data:image\/png;base64,/, '');
-    
     const msg = {
         to: attendeeData.email,
         from: {
@@ -124,15 +121,6 @@ async function sendQRCodeEmail(attendeeData, qrCodeImage) {
             name: 'TEDx Silver Oaks'
         },
         subject: 'Your TEDx Silver Oaks 2025 Entry Pass',
-        attachments: [
-            {
-                content: base64Data,
-                filename: 'qr-code.png',
-                type: 'image/png',
-                disposition: 'inline',
-                content_id: 'qrcode'
-            }
-        ],
         html: `
             <!DOCTYPE html>
             <html>
@@ -166,7 +154,9 @@ async function sendQRCodeEmail(attendeeData, qrCodeImage) {
                         <div class="qr-section">
                             <h2>Your Entry Pass</h2>
                             <p>Present this QR code at the entrance</p>
-                            <img src="cid:qrcode" alt="Entry QR Code" class="qr-code">
+                            <div style="text-align: center;">
+                                <img src="${qrCodeImage}" alt="Entry QR Code" style="max-width: 250px; margin: 15px auto; background: white; padding: 10px; border-radius: 4px; display: inline-block;">
+                            </div>
                             <p style="font-size: 12px; color: #666; margin-top: 10px;">Save this email or screenshot the QR code</p>
                         </div>
                         
@@ -320,7 +310,25 @@ app.post('/api/check-in', async (req, res) => {
 // API: Get all attendees (for staff portal)
 app.get('/api/attendees', async (req, res) => {
     try {
-        const attendeesList = Array.from(checkIns.values());
+        // Get from Google Sheets instead of memory
+        const authClient = await auth.getClient();
+        const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+
+        const response = await sheets.spreadsheets.values.get({
+            auth: authClient,
+            spreadsheetId: spreadsheetId,
+            range: 'Sheet1!A2:F',
+        });
+
+        const rows = response.data.values || [];
+        const attendeesList = rows.map(row => ({
+            name: row[1] || 'N/A',
+            school: row[2] || 'N/A',
+            email: row[3] || 'N/A',
+            phone: row[4] || 'N/A',
+            checkedIn: false, // Would need a separate tracking column
+        }));
+
         res.json({
             total: attendeesList.length,
             checkedIn: attendeesList.filter(a => a.checkedIn).length,
@@ -328,6 +336,7 @@ app.get('/api/attendees', async (req, res) => {
             attendees: attendeesList
         });
     } catch (error) {
+        console.error('Error fetching attendees:', error);
         res.status(500).json({ error: error.message });
     }
 });
