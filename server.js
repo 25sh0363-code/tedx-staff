@@ -114,6 +114,9 @@ async function generateQRCode(attendeeData) {
 
 // Send email with QR code
 async function sendQRCodeEmail(attendeeData, qrCodeImage) {
+    // Convert data URL to base64
+    const base64Data = qrCodeImage.replace(/^data:image\/png;base64,/, '');
+    
     const msg = {
         to: attendeeData.email,
         from: {
@@ -121,6 +124,15 @@ async function sendQRCodeEmail(attendeeData, qrCodeImage) {
             name: 'TEDx Silver Oaks'
         },
         subject: 'Your TEDx Silver Oaks 2025 Entry Pass',
+        attachments: [
+            {
+                content: base64Data,
+                filename: 'qr-code.png',
+                type: 'image/png',
+                disposition: 'inline',
+                content_id: 'qrcode'
+            }
+        ],
         html: `
             <!DOCTYPE html>
             <html>
@@ -154,7 +166,7 @@ async function sendQRCodeEmail(attendeeData, qrCodeImage) {
                         <div class="qr-section">
                             <h2>Your Entry Pass</h2>
                             <p>Present this QR code at the entrance</p>
-                            <img src="${qrCodeImage}" alt="Entry QR Code" class="qr-code">
+                            <img src="cid:qrcode" alt="Entry QR Code" class="qr-code">
                             <p style="font-size: 12px; color: #666; margin-top: 10px;">Save this email or screenshot the QR code</p>
                         </div>
                         
